@@ -20,11 +20,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 
@@ -45,6 +48,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Main() {
     val backStack = remember { mutableStateListOf<Any>(DestinationMain()) }
+    val viewModel = viewModel<MainViewmodel>()
+    val diceState by viewModel.diceState.collectAsStateWithLifecycle()
+    val isRoll by viewModel.onrRoll.collectAsStateWithLifecycle()
+    val diceSpeed by viewModel.diceSpeed.collectAsStateWithLifecycle()
+    val diceTime by viewModel.diceTime.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -100,7 +108,12 @@ fun Main() {
                             })
                         }
                         is DestinationInteret -> NavEntry(key) {
-                            Inscription({ backStack.removeLastOrNull() })
+                            Inscription({ backStack.removeLastOrNull() },
+                                { viewModel.rollDice(diceTime, diceSpeed) },
+                                diceState,
+                                isRoll,
+                                diceTime,
+                                diceSpeed)
                         }
                         is DestinationPasInteret -> NavEntry(key) {
                             Desole({ backStack.removeLastOrNull() })
